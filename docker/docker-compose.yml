@@ -533,9 +533,16 @@ services:
     container_name: supabase-pooler
     image: supabase/supavisor:2.9.5
     restart: unless-stopped
-    ports:
-      - ${POSTGRES_PORT}:5432
-      - ${POOLER_PROXY_PORT_TRANSACTION}:6543
+    # ports publicadas no host REMOVIDAS deliberadamente (2026-09-14).
+    # O compose padrao do Supabase publica o pooler (Postgres na pratica) no
+    # host por default; nesta VPS, sem firewall, isso expunha a porta 5432
+    # publicamente. Nenhum consumidor interno (api-gw, auth, rest, realtime,
+    # storage) depende da porta publicada -- todos falam com supavisor pela
+    # rede interna do Docker via POSTGRES_HOST/POSTGRES_PORT. Acesso
+    # administrativo e por tunel SSH (ADR-0003 3.6 do INDCARD).
+    # ports:
+    #   - ${POSTGRES_PORT}:5432
+    #   - ${POOLER_PROXY_PORT_TRANSACTION}:6543
     volumes:
       - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
     healthcheck:
