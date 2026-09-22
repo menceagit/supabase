@@ -478,6 +478,15 @@ services:
     # To upgrade an existing Postgres 15 database in place, see utils/upgrade-pg17.sh.
     image: supabase/postgres:17.6.1.136
     restart: unless-stopped
+    # Alem da rede default do proprio stack, tambem entra na rede `coolify` --
+    # e a rede onde vive o container da app Next.js do INDCARD, criada e
+    # gerenciada pelo Coolify (external: true abaixo). Sem isto, todo
+    # redeploy da app perde a conexao com o banco e a aplicacao quebra
+    # inteira (todo request que le o Postgres). Ver MEM-0006 SS3.3b no repo
+    # alz-indcard-platform para o diagnostico completo.
+    networks:
+      default: {}
+      coolify: {}
     volumes:
       - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
       # Must be superuser to create event trigger
@@ -592,3 +601,9 @@ services:
 volumes:
   db-config:
   deno-cache:
+
+networks:
+  # Rede do Coolify, criada e gerenciada por ele -- so referenciada aqui
+  # (external: true), nunca criada por este compose.
+  coolify:
+    external: true
