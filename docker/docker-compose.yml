@@ -69,10 +69,11 @@ services:
     container_name: supabase-kong
     image: kong/kong:3.9.3
     restart: unless-stopped
-    networks:
-      default:
-        aliases:
-          - api-gw
+    # Sem `networks: default: aliases: [api-gw]` do upstream: no Coolify isso
+    # põe o Kong em DUAS redes (a do recurso + <uuid>_default), o proxy só
+    # alcança a primeira e o Traefik escolhe o IP do backend sem critério
+    # fixo — escolhendo a _default, a API trava (TLS ok, nenhum byte de
+    # resposta). O alias só é usado pelos overrides envoy/nginx/caddy.
     healthcheck:
       test: ["CMD", "kong", "health"]
       interval: 5s
