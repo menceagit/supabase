@@ -486,6 +486,13 @@ services:
     # To upgrade an existing Postgres 15 database in place, see utils/upgrade-pg17.sh.
     image: supabase/postgres:17.6.1.136
     restart: unless-stopped
+    # Teto de memoria do Postgres (INDCARD, 2026-10-01): 6 GB dos 16 GB da
+    # VPS; parametros (shared_buffers 1536MB, effective_cache_size 4GB,
+    # work_mem 16MB) por ALTER SYSTEM, no postgresql.auto.conf do volume.
+    # shm_size: o padrao de 64 MB do Docker estoura em consulta paralela.
+    mem_limit: 6g
+    memswap_limit: 6g
+    shm_size: 1g
     # Alem da rede default do proprio stack, tambem entra na rede `coolify` --
     # e a rede onde vive o container da app Next.js do INDCARD, criada e
     # gerenciada pelo Coolify (external: true abaixo). Sem isto, todo
