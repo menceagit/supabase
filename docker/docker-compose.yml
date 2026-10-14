@@ -82,6 +82,15 @@ services:
     depends_on:
       studio:
         condition: service_healthy
+    # O kong.yml aponta o upstream do Realtime para
+    # `realtime-dev.supabase-realtime:4000`, nome que vinha do container_name
+    # do upstream. O Coolify reescreve o container_name (e ignora alias de rede
+    # declarado na rede do recurso), então o nome deixa de resolver e todo
+    # /realtime/v1 devolve 503. `links` cria o alias só na visão do Kong, na
+    # rede do recurso onde ele já está (sem segunda rede). O prefixo
+    # `realtime-dev` precisa ser mantido: o Realtime tira o tenant do Host.
+    links:
+      - realtime:realtime-dev.supabase-realtime
     ports:
       - ${KONG_HTTP_PORT}:8000/tcp
       - ${KONG_HTTPS_PORT}:8443/tcp
